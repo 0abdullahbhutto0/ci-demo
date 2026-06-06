@@ -29,14 +29,13 @@ jobs:
       - name: Run tests
         run: pytest tests/ -v
 
-      # Login to Docker Hub and build image
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push
+      - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -45,26 +44,22 @@ jobs:
             ${{ secrets.DOCKER_USERNAME }}/calculator:latest
             ${{ secrets.DOCKER_USERNAME }}/calculator:${{ github.sha }}
 
-  # Deploy job
   deploy:
     runs-on: ubuntu-latest
     needs: test
 
     steps:
       - name: Deploy to EC2
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@v0.1.10
         with:
-          host: ${{ secrets.PROD_EC2_HOST }}
+          host: ${{ secrets.EC2_HOST }}
           username: ubuntu
-          key: ${{ secrets.PROD_SSH_KEY }}
+          key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            docker pull ${{ env.IMAGE_NAME }}:latest
-            docker stop myapp || true
-            docker rm myapp || true
+            docker pull 0abdullahbhutto0/calculator:latest
+            docker stop calculator || true
+            docker rm calculator || true
             docker run -d \
-              --name myapp \
-              --restart unless-stopped \
-              -p 8000:8000 \
-              ${{ env.IMAGE_NAME }}:latest
-
-            echo "Deployed: $(date)"
+              -p 80:8000 \
+              --name calculator \
+              0abdullahbhutto0/calculator:latest
