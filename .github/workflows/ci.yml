@@ -56,10 +56,10 @@ jobs:
           username: ubuntu
           key: ${{ secrets.PROD_SSH_KEY }}
           script: |
-            docker pull 0abdullahbhutto0/calculator:latest
-            docker stop calculator || true
-            docker rm calculator || true
-            docker run -d \
+            sudo docker pull 0abdullahbhutto0/calculator:latest
+            sudo docker stop calculator || true
+            sudo docker rm calculator || true
+            sudo docker run -d \
               -p 80:8000 \
               --name calculator \
               0abdullahbhutto0/calculator:latest
